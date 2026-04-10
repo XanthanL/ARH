@@ -10,7 +10,7 @@ interface QuizProps {
 const OPTIONS = [
   { label: '强烈同意', value: 2, color: 'bg-emerald-600', hover: 'hover:bg-emerald-700' },
   { label: '同意', value: 1, color: 'bg-emerald-400', hover: 'hover:bg-emerald-500' },
-  { id: 'neutral', label: '中立 / 纯路人', value: 0, color: 'bg-slate-300', hover: 'hover:bg-slate-400' },
+  { id: 'neutral', label: '中立', value: 0, color: 'bg-slate-300', hover: 'hover:bg-slate-400' },
   { label: '反对', value: -1, color: 'bg-rose-400', hover: 'hover:bg-rose-500' },
   { label: '强烈反对', value: -2, color: 'bg-slate-900', hover: 'hover:bg-black' },
 ];
