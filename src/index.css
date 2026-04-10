@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased text-slate-900 bg-slate-50;
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+}
+
+.radar-chart .recharts-polar-grid-concentric-path {
+  @apply stroke-slate-200;
+}
+.radar-chart .recharts-polar-angle-axis-line {
+  @apply stroke-slate-300;
+}
