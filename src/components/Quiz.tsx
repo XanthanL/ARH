@@ -33,14 +33,17 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete }) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50 text-slate-900">
       <div className="w-full max-w-xl">
-        <div className="mb-12 flex justify-between items-baseline">
+        <div className="mb-12 flex justify-between items-center">
           <span className="font-mono text-xs text-slate-400 uppercase tracking-widest">
             {String(currentIdx + 1).padStart(2, '0')} / {String(QUESTIONS.length).padStart(2, '0')}
           </span>
-          <div className="flex gap-1">
-             {QUESTIONS.map((_, idx) => (
-                <div key={idx} className={`h-1 w-4 ${idx <= currentIdx ? 'bg-slate-900' : 'bg-slate-200'}`} />
-             ))}
+          <div className="w-48 h-1 bg-slate-200 relative overflow-hidden">
+            <motion.div 
+              className="absolute left-0 top-0 h-full bg-slate-900"
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentIdx + 1) / QUESTIONS.length) * 100}%` }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
         </div>
 

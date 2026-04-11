@@ -4,9 +4,11 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Pola
 import { calculateUserCoordinates, findClosestIdeology } from '../utils/algorithm';
 import { Download, RotateCcw } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import { Axis } from '../data/questions';
 
 interface ResultProps {
   answers: Record<number, number>;
+  overriddenCoords?: Record<Axis, number> | null;
   onReset: () => void;
 }
 
@@ -19,9 +21,29 @@ const AXIS_CONFIG = [
   { key: 'tech', left: '加速前进', right: '回归自然', colorL: 'bg-fuchsia-600', colorR: 'bg-orange-800' },
 ];
 
-export const Result: React.FC<ResultProps> = ({ answers, onReset }) => {
+const LEANING_LABELS: Record<string, string[]> = {
+  economy: ["彻底的公有制拥趸", "偏好强福利与干预", "混合经济中间派", "捍卫自由市场竞争", "原教旨市场资本主义"],
+  power: ["迷信铁拳与国家机器", "倾向秩序与集体服从", "法治与民主的平衡", "警惕公权力的扩大", "极端的个人自由神圣"],
+  culture: ["激进的传统解构者", "拥抱多元与平权", "温和的社会改良派", "守护核心家庭与道德", "极其保守的复古主义"],
+  identity: ["无国界的世界公民", "支持全球化与开放边界", "温和的爱国主义者", "本土利益绝对优先", "狂热的血统与种族主义"],
+  ecology: ["狂热的自然保护神", "环保与气候危机警惕者", "可持续发展的折中派", "人类福祉与开发优先", "绝对的工业机器崇拜"],
+  tech: ["赛博飞升的狂热信徒", "拥抱 AI 与技术革命", "谨慎的技术评估者", "警惕技术异化与垄断", "拥抱自然的原始主义"]
+};
+
+const getLeaning = (axis: string, score: number) => {
+  const labels = LEANING_LABELS[axis];
+  if (score < -60) return labels[0];
+  if (score < -20) return labels[1];
+  if (score <= 20) return labels[2];
+  if (score <= 60) return labels[3];
+  return labels[4];
+};
+
+export const Result: React.FC<ResultProps> = ({ answers, overriddenCoords, onReset }) => {
   const resultRef = useRef<HTMLDivElement>(null);
-  const userCoords = calculateUserCoordinates(answers);
+  const userCoords = useMemo(() => {
+    return overriddenCoords || calculateUserCoordinates(answers);
+  }, [answers, overriddenCoords]);
   const match = findClosestIdeology(userCoords);
 
   const persona = useMemo(() => {
@@ -95,37 +117,42 @@ export const Result: React.FC<ResultProps> = ({ answers, onReset }) => {
         </motion.div>
 
         {/* 光谱分析区块 */}
-        <motion.div variants={itemVariants} className="mb-16 space-y-8">
+        <motion.div variants={itemVariants} className="mb-24 space-y-10">
+           <h3 className="text-slate-400 font-medium tracking-[0.2em] uppercase text-[10px] text-center mb-12">你的潜意识光谱分析</h3>
            {AXIS_CONFIG.map(({ key, left, right, colorL, colorR }) => {
               const score = userCoords[key as keyof typeof userCoords];
               const leftPercent = (100 - score) / 2;
               const rightPercent = (100 + score) / 2;
+              const leaning = getLeaning(key, score);
               return (
-                <div key={key}>
-                  <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">
-                    <span>{left} ({Math.round(leftPercent)}%)</span>
-                    <span>{right} ({Math.round(rightPercent)}%)</span>
+                <div key={key} className="relative">
+                  <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-3 px-1">
+                    <span>{left} {Math.round(leftPercent)}%</span>
+                    <span className="text-slate-900 bg-slate-100 px-2 py-0.5 rounded italic">{leaning}</span>
+                    <span>{right} {Math.round(rightPercent)}%</span>
                   </div>
-                  <div className="flex h-6 w-full rounded-md overflow-hidden bg-slate-100 p-0.5">
-                    <motion.div initial={{ width: '50%' }} animate={{ width: `${leftPercent}%` }} transition={{ duration: 1.2, ease: "easeOut" }} className={`h-full ${colorL}`} />
-                    <div className="w-[1px] bg-white" />
-                    <motion.div initial={{ width: '50%' }} animate={{ width: `${rightPercent}%` }} transition={{ duration: 1.2, ease: "easeOut" }} className={`h-full ${colorR}`} />
+                  <div className="flex h-5 w-full rounded-full overflow-hidden bg-slate-100 p-0.5 shadow-inner">
+                    <motion.div initial={{ width: '50%' }} animate={{ width: `${leftPercent}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className={`h-full rounded-full ${colorL}`} />
+                    <div className="w-[2px] bg-white z-10" />
+                    <motion.div initial={{ width: '50%' }} animate={{ width: `${rightPercent}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className={`h-full rounded-full ${colorR}`} />
                   </div>
                 </div>
               );
            })}
         </motion.div>
 
-        <motion.div variants={itemVariants} className="mb-16 flex justify-center">
-          <div className="bg-black text-white px-6 py-3 font-black tracking-widest italic text-xl">
+        <motion.div variants={itemVariants} className="mb-20 flex justify-center">
+          <div className="bg-black text-white px-6 py-3 font-black tracking-widest italic text-xl shadow-xl">
             {persona}
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="border-l-4 border-slate-800 pl-6 pt-2">
-          <p className="text-slate-700 leading-relaxed text-lg font-serif text-justify">
-            {match.serious_analysis.replace(/^【.*?】：/, '')}
-          </p>
+        <motion.div variants={itemVariants} className="border-l-4 border-slate-900 pl-8 space-y-6">
+          {match.serious_analysis.split('\n\n').map((para, i) => (
+            <p key={i} className="text-slate-700 leading-relaxed text-lg font-serif text-justify">
+              {para.replace(/^【.*?】：/, '')}
+            </p>
+          ))}
         </motion.div>
       </motion.div>
 

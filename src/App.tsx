@@ -2,42 +2,42 @@ import React, { useState } from 'react';
 import { Home } from './components/Home';
 import { Quiz } from './components/Quiz';
 import { Result } from './components/Result';
+import { Axis } from './data/questions';
 
 type Step = 'home' | 'quiz' | 'result';
-
-interface AppProps {}
 
 function App() {
   const [step, setStep] = useState<Step>('home');
   const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [overriddenCoords, setOverriddenCoords] = useState<Record<Axis, number> | null>(null);
 
-  const handleStart = () => setStep('quiz');
+  const handleStart = () => {
+    setOverriddenCoords(null);
+    setStep('quiz');
+  };
   
   const handleQuizComplete = (finalAnswers: Record<number, number>) => {
     setAnswers(finalAnswers);
+    setOverriddenCoords(null);
     setStep('result');
   };
 
-  const handleDebugResult = () => {
-    // 生成随机/模拟答案用于验证
-    const debugAnswers: Record<number, number> = {};
-    for (let i = 1; i <= 60; i++) {
-      debugAnswers[i] = Math.floor(Math.random() * 5) - 2; // -2 到 2
-    }
-    setAnswers(debugAnswers);
+  const handleDevInject = (coords: Record<Axis, number>) => {
+    setOverriddenCoords(coords);
     setStep('result');
   };
 
   const handleReset = () => {
     setAnswers({});
+    setOverriddenCoords(null);
     setStep('home');
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 selection:bg-indigo-100">
-      {step === 'home' && <Home onStart={handleStart} onDebug={handleDebugResult} />}
+    <div className="min-h-screen bg-slate-50 selection:bg-red-100">
+      {step === 'home' && <Home onStart={handleStart} onDevInject={handleDevInject} />}
       {step === 'quiz' && <Quiz onComplete={handleQuizComplete} />}
-      {step === 'result' && <Result answers={answers} onReset={handleReset} />}
+      {step === 'result' && <Result answers={answers} overriddenCoords={overriddenCoords} onReset={handleReset} />}
     </div>
   );
 }
