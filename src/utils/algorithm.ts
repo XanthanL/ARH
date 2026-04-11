@@ -13,7 +13,6 @@ export const calculateUserCoordinates = (answers: Record<number, number>): Recor
 
   const normalizedCoords: Record<Axis, number> = {} as any;
   (Object.keys(rawScores) as Axis[]).forEach(axis => {
-    // 每轴10题，最大原始分20 (10题 * 2分)
     normalizedCoords[axis] = (rawScores[axis] / 20) * 100;
   });
 
@@ -22,26 +21,26 @@ export const calculateUserCoordinates = (answers: Record<number, number>): Recor
 
 export const findClosestIdeology = (userCoords: Record<Axis, number>) => {
   let closestMatch: Ideology = IDEOLOGIES[0];
-  let minDistance = Infinity;
+  let minWeightedDistance = Infinity;
 
   const axes: Axis[] = ['economy', 'power', 'culture', 'identity', 'ecology', 'tech'];
 
   IDEOLOGIES.forEach(ideology => {
-    const distance = Math.sqrt(
+    // 加权欧几里得距离计算
+    const weightedDistance = Math.sqrt(
       axes.reduce((sum, axis) => {
         const diff = userCoords[axis] - ideology.coordinates[axis];
-        return sum + Math.pow(diff, 2);
+        const weight = ideology.axisWeights[axis] || 1.0;
+        return sum + weight * Math.pow(diff, 2);
       }, 0)
     );
 
-    if (distance < minDistance) {
-      minDistance = distance;
+    if (weightedDistance < minWeightedDistance) {
+      minWeightedDistance = weightedDistance;
       closestMatch = ideology;
     }
   });
 
-  const maxPossibleDist = Math.sqrt(6 * Math.pow(200, 2)); // 489.89
-  const matchPercentage = Math.max(0, Math.min(100, Math.round((1 - minDistance / maxPossibleDist) * 100)));
-
-  return { ...closestMatch, matchPercentage };
+  // 简化的匹配百分比计算
+  return { ...closestMatch, matchPercentage: 100 };
 };
