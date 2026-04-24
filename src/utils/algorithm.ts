@@ -38,14 +38,25 @@ export const findClosestIdeology = (userCoords: Record<Axis, number>) => {
 
   IDEOLOGIES.forEach(ideology => {
     // --- VETO SYSTEM (一票否决机制) ---
-    // 如果用户极其偏向自由 (power > 10)，严禁匹配极权/威权主义 (其 power 坐标通常为 -70 ~ -100)
-    if ((ideology.id === 'totalitarianism' || ideology.id === 'authoritarianism') && userCoords.power > 10) {
-      return; // 强制排除
+    // 1. 权力/自由维度红线
+    if ((['totalitarianism', 'authoritarianism', 'fascism'].includes(ideology.id)) && userCoords.power > 10) {
+      return; // 偏向自由的人绝对不可能是法西斯或极权
     }
-    
-    // 反之：如果用户极其偏向权威 (power < -10)，严禁匹配自由意志主义相关
-    if ((ideology.id === 'libertarianism' || ideology.id === 'ancap' || ideology.id === 'anarchism') && userCoords.power < -10) {
-      return; // 强制排除
+    if ((['libertarianism', 'ancap', 'anarchism', 'anarchoegoism'].includes(ideology.id)) && userCoords.power < -10) {
+      return; // 偏向权威的人绝对不可能是无政府或自由意志主义
+    }
+
+    // 2. 经济/阶级维度红线
+    if ((['ml', 'trotskyism', 'ancom'].includes(ideology.id)) && userCoords.economy > 20) {
+      return; // 支持纯市场的人绝对不可能是托派或马列
+    }
+    if ((['objectivism', 'ancap'].includes(ideology.id)) && userCoords.economy < -20) {
+      return; // 支持公有制的人绝对不可能是客观主义者
+    }
+
+    // 3. 认同/民族维度红线
+    if ((['ethnonationalism', 'fascism'].includes(ideology.id)) && userCoords.identity < -30) {
+      return; // 世界主义者绝对不可能是种族民族主义或法西斯
     }
 
     // 加权欧几里得距离计算

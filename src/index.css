@@ -6,6 +6,37 @@
   body {
     @apply antialiased text-slate-900 bg-slate-50;
     font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    position: relative;
+  }
+
+  /* CRT 扫描线效果层 */
+  body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.02) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
+    z-index: 9999;
+    background-size: 100% 3px, 2px 100%;
+    pointer-events: none;
+  }
+
+  /* 极轻微的屏幕闪烁 */
+  body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: radial-gradient(circle, transparent 70%, rgba(0, 0, 0, 0.05) 100%);
+    z-index: 10000;
+    pointer-events: none;
   }
 }
 
